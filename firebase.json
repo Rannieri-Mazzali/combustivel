@@ -1,0 +1,27 @@
+{
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "redirects": [
+      {
+        "source": "/dashboard",
+        "destination": "/dashboard.html",
+        "type": 301
+      },
+      {
+        "source": "/history",
+        "destination": "/history.html",
+        "type": 301
+      },
+      {
+        "source": "/vehicles",
+        "destination": "/vehicles.html",
+        "type": 301
+      }
+    ]
+  }
+}

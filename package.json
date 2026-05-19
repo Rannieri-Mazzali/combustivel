@@ -1,0 +1,12 @@
+{
+  "name": "FleetFuel",
+  "version": "1.0.0",
+  "description": "Sistema de Gestão de Abastecimento de Frota",
+  "keywords": ["frota", "abastecimento", "combustível", "gestão", "caminhões"],
+  "author": "FleetFuel",
+  "license": "MIT",
+  "dependencies": {
+    "firebase": "^9.22.0",
+    "@emailjs/browser": "^3.11.0"
+  }
+}

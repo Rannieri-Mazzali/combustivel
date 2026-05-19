@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Depósito de Combustível - FleetFuel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../src/css/styles.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="../src/js/firebase-config.js"></script>
+    
+    <!-- Modules -->
+    <script src="../src/js/modules/utils.js"></script>
+    <script src="../src/js/modules/auth.js"></script>
+    <script src="../src/js/modules/fuel-depot.js"></script>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div class="min-h-screen">
+        <!-- Navbar -->
+        <nav class="bg-slate-800 border-b border-slate-700 sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center space-x-3">
+                        <button onclick="navigateTo('dashboard.html')" class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center hover:shadow-lg transition">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </button>
+                        <h1 class="text-xl font-bold text-white">FleetFuel</h1>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <button onclick="navigateTo('dashboard.html')" class="text-slate-300 hover:text-white px-3 py-2 rounded-lg transition">
+                            Dashboard
+                        </button>
+                        <button onclick="navigateTo('vehicles.html')" class="text-slate-300 hover:text-white px-3 py-2 rounded-lg transition">
+                            Veículos
+                        </button>
+                        <button onclick="navigateTo('history.html')" class="text-slate-300 hover:text-white px-3 py-2 rounded-lg transition">
+                            Histórico
+                        </button>
+                        <div class="relative group">
+                            <button class="text-slate-300 hover:text-white px-3 py-2 rounded-lg transition flex items-center space-x-1">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span id="user-name">Usuário</span>
+                            </button>
+                            <div class="hidden group-hover:block absolute right-0 mt-0 w-48 bg-slate-700 rounded-lg shadow-lg">
+                                <button onclick="handleLogout()" class="block w-full text-left px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-600 transition">
+                                    Sair
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Header -->
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-white mb-2">⛽ Depósito de Combustível</h2>
+                <p class="text-slate-400">Gerencie o estoque de combustível para abastecer seus caminhões</p>
+            </div>
+
+            <!-- Main Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Tank Visualization -->
+                <div class="lg:col-span-2">
+                    <div class="bg-slate-800 rounded-lg shadow-2xl p-8 border border-slate-700">
+                        <!-- Tank Container -->
+                        <div class="flex flex-col items-center space-y-8">
+                            <!-- Title -->
+                            <div class="text-center">
+                                <h3 class="text-2xl font-bold text-white mb-2">Tanque de Armazenamento</h3>
+                                <p class="text-slate-400">Nível de combustível em estoque</p>
+                            </div>
+
+                            <!-- Large Tank Visual -->
+                            <div class="flex flex-col items-center space-y-6 w-full">
+                                <!-- Tank Box -->
+                                <div class="w-full max-w-sm">
+                                    <div class="bg-gradient-to-b from-slate-700 to-slate-900 border-4 border-slate-600 rounded-lg p-6 flex flex-col h-96 relative overflow-hidden shadow-2xl">
+                                        <!-- Gradient background for 3D effect -->
+                                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-10 pointer-events-none"></div>
+                                        
+                                        <!-- Fuel Level Container -->
+                                        <div class="flex-1 flex flex-col-reverse relative">
+                                            <!-- Fuel Level Bar -->
+                                            <div id="fuel-level" class="w-full bg-gradient-to-t from-green-500 to-green-400 rounded transition-all duration-300 ease-out shadow-lg" style="height: 0%; background-color: #10b981;"></div>
+                                            
+                                            <!-- Percentage Display Inside Tank -->
+                                            <div class="absolute inset-0 flex items-center justify-center z-10">
+                                                <div class="text-center">
+                                                    <div class="text-6xl font-bold text-white drop-shadow-lg" id="fuel-percentage">0.0%</div>
+                                                    <div class="text-white text-lg drop-shadow-md mt-2" id="fuel-liters">0.00 L</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Tank Info -->
+                                <div class="w-full max-w-sm grid grid-cols-2 gap-4">
+                                    <div class="bg-slate-700 p-4 rounded-lg text-center border border-slate-600">
+                                        <p class="text-slate-400 text-sm">Capacidade Total</p>
+                                        <p class="text-white text-xl font-bold mt-1" id="fuel-capacity">5000 L</p>
+                                    </div>
+                                    <div class="bg-slate-700 p-4 rounded-lg text-center border border-slate-600">
+                                        <p class="text-slate-400 text-sm">Espaço Disponível</p>
+                                        <p class="text-white text-xl font-bold mt-1" id="fuel-remaining">5000.00 L</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add Fuel Form -->
+                    <div class="bg-slate-800 rounded-lg shadow-2xl p-8 border border-slate-700 mt-8">
+                        <h3 class="text-2xl font-bold text-white mb-6">➕ Adicionar Combustível</h3>
+                        <form onsubmit="handleAddFuel(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Tipo de Combustível</label>
+                                <select 
+                                    id="fuel-type"
+                                    class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                                    required
+                                >
+                                    <option value="Diesel">Diesel</option>
+                                    <option value="Gasolina">Gasolina</option>
+                                    <option value="Etanol">Etanol</option>
+                                    <option value="Diesel S10">Diesel S10</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Quantidade (Litros)</label>
+                                <input 
+                                    type="number" 
+                                    id="fuel-liters-input" 
+                                    placeholder="500"
+                                    step="0.01"
+                                    min="0"
+                                    class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                                    required
+                                >
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Notas (opcional)</label>
+                                <textarea 
+                                    id="fuel-notes" 
+                                    placeholder="Fornecedor, referência, etc..."
+                                    rows="2"
+                                    class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                                ></textarea>
+                            </div>
+
+                            <button 
+                                type="submit"
+                                class="w-full py-3 px-6 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg hover:from-green-600 hover:to-green-700 transition duration-200 transform hover:scale-105"
+                            >
+                                Adicionar Combustível
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="lg:col-span-1 space-y-6">
+                    <!-- Settings -->
+                    <div class="bg-slate-800 rounded-lg shadow-2xl p-6 border border-slate-700 sticky top-24">
+                        <h3 class="text-lg font-bold text-white mb-4">⚙️ Configurações</h3>
+                        <button 
+                            onclick="openCapacityModal()"
+                            class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition"
+                        >
+                            Alterar Capacidade
+                        </button>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="bg-slate-800 rounded-lg shadow-2xl p-6 border border-slate-700">
+                        <h3 class="text-lg font-bold text-white mb-4">📊 Atividade Recente</h3>
+                        <div id="history-container" class="space-y-3">
+                            <div class="text-center py-4 text-slate-400">
+                                <p>Carregando...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Capacity Modal -->
+    <div id="capacity-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-slate-800 rounded-lg shadow-2xl p-8 border border-slate-700 max-w-md w-full mx-4">
+            <h3 class="text-2xl font-bold text-white mb-6">Alterar Capacidade do Tanque</h3>
+            <form onsubmit="handleCapacityUpdate(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Nova Capacidade (Litros)</label>
+                    <input 
+                        type="number" 
+                        id="new-capacity" 
+                        placeholder="5000"
+                        step="100"
+                        min="0"
+                        class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+                        required
+                    >
+                </div>
+
+                <div class="flex gap-4">
+                    <button 
+                        type="button"
+                        onclick="closeCapacityModal()"
+                        class="flex-1 py-2 px-4 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg transition"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        type="submit"
+                        class="flex-1 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition"
+                    >
+                        Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
+        <div class="bg-slate-800 rounded-lg p-8 border border-slate-700">
+            <div class="flex items-center space-x-3">
+                <div class="animate-spin">
+                    <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                </div>
+                <span class="text-white font-semibold">Carregando...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50"></div>
+</body>
+</html>

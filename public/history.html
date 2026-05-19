@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico - FleetFuel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../src/css/styles.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="../src/js/firebase-config.js"></script>
+    
+    <!-- Modules -->
+    <script src="../src/js/modules/utils.js"></script>
+    <script src="../src/js/modules/auth.js"></script>
+    <script src="../src/js/modules/vehicle.js"></script>
+    <script src="../src/js/modules/refuel.js"></script>
+    <script src="../src/js/modules/email.js"></script>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div class="min-h-screen">
+        <!-- Navbar -->
+        <nav class="bg-slate-800 border-b border-slate-700 sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center space-x-3">
+                        <button onclick="navigateTo('dashboard.html')" class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center hover:shadow-lg transition">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </button>
+                        <h1 class="text-xl font-bold text-white">FleetFuel</h1>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <button onclick="navigateTo('fuel-depot.html')" class="text-slate-300 hover:text-white px-3 py-2 rounded-lg transition">
+                            ⛽ Depósito
+                        </button>
+                        <button onclick="navigateTo('dashboard.html')" class="text-slate-300 hover:text-white px-3 py-2 rounded-lg transition">
+                            Dashboard
+                        </button>
+                        <button onclick="navigateTo('vehicles.html')" class="text-slate-300 hover:text-white px-3 py-2 rounded-lg transition">
+                            Veículos
+                        </button>
+                        <div class="relative group">
+                            <button class="text-slate-300 hover:text-white px-3 py-2 rounded-lg transition flex items-center space-x-1">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span id="user-name">Usuário</span>
+                            </button>
+                            <div class="hidden group-hover:block absolute right-0 mt-0 w-48 bg-slate-700 rounded-lg shadow-lg">
+                                <button onclick="handleLogout()" class="block w-full text-left px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-600 transition">
+                                    Sair
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Header -->
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-white mb-2">Histórico de Abastecimentos</h2>
+                <p class="text-slate-400">Consulte o histórico completo de abastecimentos da sua frota</p>
+            </div>
+
+            <!-- Filters -->
+            <div class="bg-slate-800 rounded-lg shadow-2xl p-6 border border-slate-700 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Vehicle Filter -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Filtrar por Veículo</label>
+                        <select 
+                            id="filter-vehicle"
+                            onchange="applyFilters()"
+                            class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                        >
+                            <option value="">Todos os veículos</option>
+                        </select>
+                    </div>
+
+                    <!-- Date Range -->
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Data Inicial</label>
+                        <input 
+                            type="date" 
+                            id="filter-date-start"
+                            onchange="applyFilters()"
+                            class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Data Final</label>
+                        <input 
+                            type="date" 
+                            id="filter-date-end"
+                            onchange="applyFilters()"
+                            class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                        >
+                    </div>
+                </div>
+
+                <div class="mt-4 flex gap-4">
+                    <button 
+                        onclick="exportToCSV()"
+                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition"
+                    >
+                        📥 Exportar para CSV
+                    </button>
+                    <button 
+                        onclick="sendReport()"
+                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition"
+                    >
+                        📧 Enviar Relatório
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="bg-slate-800 rounded-lg shadow-2xl border border-slate-700 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-slate-300">
+                        <thead class="bg-slate-700 border-b border-slate-600">
+                            <tr>
+                                <th class="px-6 py-3 text-left font-semibold">Veículo</th>
+                                <th class="px-6 py-3 text-left font-semibold">Data/Hora</th>
+                                <th class="px-6 py-3 text-right font-semibold">KM</th>
+                                <th class="px-6 py-3 text-right font-semibold">Litros</th>
+                                <th class="px-6 py-3 text-right font-semibold">Custo</th>
+                                <th class="px-6 py-3 text-left font-semibold">Tipo</th>
+                                <th class="px-6 py-3 text-left font-semibold">Local</th>
+                                <th class="px-6 py-3 text-center font-semibold">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="refuel-table-body">
+                            <tr>
+                                <td colspan="8" class="px-6 py-8 text-center text-slate-400">
+                                    Carregando histórico...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="bg-slate-700 px-6 py-4 flex justify-between items-center border-t border-slate-600">
+                    <p class="text-slate-300" id="pagination-info">Carregando...</p>
+                    <div class="flex gap-2">
+                        <button 
+                            onclick="previousPage()"
+                            class="px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg transition"
+                        >
+                            ← Anterior
+                        </button>
+                        <button 
+                            onclick="nextPage()"
+                            class="px-4 py-2 bg-slate-600 hover:bg-slate-500 text-white rounded-lg transition"
+                        >
+                            Próxima →
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
+                <div class="bg-slate-800 rounded-lg shadow-2xl p-6 border border-slate-700">
+                    <p class="text-slate-400 text-sm">Total de Registros</p>
+                    <p class="text-white text-3xl font-bold" id="summary-total">0</p>
+                </div>
+                <div class="bg-slate-800 rounded-lg shadow-2xl p-6 border border-slate-700">
+                    <p class="text-slate-400 text-sm">Total de Litros</p>
+                    <p class="text-white text-3xl font-bold" id="summary-liters">0</p>
+                </div>
+                <div class="bg-slate-800 rounded-lg shadow-2xl p-6 border border-slate-700">
+                    <p class="text-slate-400 text-sm">Gasto Total</p>
+                    <p class="text-white text-3xl font-bold" id="summary-cost">R$ 0</p>
+                </div>
+                <div class="bg-slate-800 rounded-lg shadow-2xl p-6 border border-slate-700">
+                    <p class="text-slate-400 text-sm">Média por Litro</p>
+                    <p class="text-white text-3xl font-bold" id="summary-average">R$ 0</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para editar registro -->
+    <div id="edit-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-slate-800 rounded-lg shadow-2xl p-8 max-w-md w-full border border-slate-700">
+            <h3 class="text-2xl font-bold text-white mb-6">Editar Abastecimento</h3>
+            <form onsubmit="saveEdit(event)" class="space-y-4">
+                <input type="hidden" id="edit-record-id">
+                
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">KM</label>
+                    <input 
+                        type="number" 
+                        id="edit-km"
+                        step="0.01"
+                        class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                        required
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Litros</label>
+                    <input 
+                        type="number" 
+                        id="edit-liters"
+                        step="0.01"
+                        class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                        required
+                    >
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-2">Custo</label>
+                    <input 
+                        type="number" 
+                        id="edit-cost"
+                        step="0.01"
+                        class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white"
+                    >
+                </div>
+
+                <div class="flex gap-4">
+                    <button 
+                        type="submit"
+                        class="flex-1 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition"
+                    >
+                        Salvar
+                    </button>
+                    <button 
+                        type="button"
+                        onclick="closeEditModal()"
+                        class="flex-1 py-2 px-4 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg transition"
+                    >
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../src/js/firebase-config.js"></script>
+    <script src="../src/js/modules/utils.js"></script>
+    <script src="../src/js/modules/auth.js"></script>
+    <script src="../src/js/modules/vehicle.js"></script>
+    <script src="../src/js/modules/refuel.js"></script>
+    <script src="../src/js/modules/email.js"></script>
+    <script src="../src/js/pages/history.js"></script>
+</body>
+</html>
