@@ -5,6 +5,10 @@
   "keywords": ["frota", "abastecimento", "combustível", "gestão", "caminhões"],
   "author": "FleetFuel",
   "license": "MIT",
+  "scripts": {
+    "build": "echo 'Static site - no build needed'",
+    "start": "echo 'Static site - ready to serve'"
+  },
   "dependencies": {
     "firebase": "^9.22.0",
     "@emailjs/browser": "^3.11.0"
