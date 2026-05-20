@@ -6,20 +6,10 @@
     <title>Gerenciar Veículos - FleetFuel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="../src/css/styles.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    
-    <!-- Firebase Config (Modular SDK) -->
-    <script type="module" src="../src/js/firebase-config.js"></script>
-    
-    <!-- Modules (ES6) -->
-    <script type="module" src="../src/js/modules/utils.js"></script>
-    <script type="module" src="../src/js/modules/auth.js"></script>
-    <script type="module" src="../src/js/modules/vehicle.js"></script>
-    <script type="module" src="../src/js/modules/refuel.js"></script>
-    <script type="module" src="../src/js/modules/email.js"></script>
-    
-    <!-- Page Scripts (ES6) -->
-    <script type="module" src="../src/js/pages/vehicles.js"></script>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
     <div class="min-h-screen">
@@ -195,5 +185,18 @@
             </form>
         </div>
     </div>
+
+    <!-- Firebase Config -->
+    <script src="../src/js/firebase-config.js"></script>
+    
+    <!-- Modules -->
+    <script src="../src/js/modules/utils.js"></script>
+    <script src="../src/js/modules/auth.js"></script>
+    <script src="../src/js/modules/vehicle.js"></script>
+    <script src="../src/js/modules/refuel.js"></script>
+    <script src="../src/js/modules/email.js"></script>
+    
+    <!-- Page Scripts -->
+    <script src="../src/js/pages/vehicles.js"></script>
 </body>
 </html>

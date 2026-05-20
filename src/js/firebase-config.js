@@ -1,7 +1,5 @@
-// Firebase Configuration - Modular SDK
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
-import { getFirestore, enableIndexedDbPersistence } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+// Firebase Configuration - Otimizado para Performance
+// Para produção, atualize com suas credenciais reais
 
 const firebaseConfig = {
   apiKey: "AIzaSyDo_Demo_Key_For_Testing",
@@ -12,45 +10,77 @@ const firebaseConfig = {
   appId: "1:123456789:web:abcdef123456"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-// Habilitar cache offline
-enableIndexedDbPersistence(db).catch((err) => {
-  // Silenciosamente ignorar erros
-});
-
+let db, auth;
 let demoUserEmail = "demo@fleetfuel.local";
 let demoUserPassword = "demo123456";
 let firebaseReady = false;
 
-// Auto-login com usuário demo
-const initializeDemo = async () => {
-  try {
-    await signInWithEmailAndPassword(auth, demoUserEmail, demoUserPassword);
-  } catch (error) {
-    if (error.code === 'auth/user-not-found') {
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, demoUserEmail, demoUserPassword);
-        const user = userCredential.user;
-        // Usuário criado com sucesso
-      } catch (createError) {
-        // Erro ao criar usuário
-      }
+// Esperar Firebase estar pronto
+function waitForFirebase() {
+  return new Promise((resolve) => {
+    if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
+      resolve();
+      return;
     }
-  } finally {
-    firebaseReady = true;
-  }
-};
+    setTimeout(() => waitForFirebase().then(resolve), 100);
+  });
+}
 
-initializeDemo();
+try {
+  // Aguardar Firebase carregar
+  waitForFirebase().then(() => {
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
 
-// Exportar para uso global
-window.db = db;
-window.auth = auth;
-window.onAuthStateChanged = onAuthStateChanged;
-window.signOut = signOut;
-window.firebaseReady = firebaseReady;
+    // Initialize Firestore com otimizações
+    db = firebase.firestore();
+    auth = firebase.auth();
+
+    // Modo desenvolvimento - otimizado para velocidade
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      db.settings({ 
+        experimentalForceLongPolling: false,
+        cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
+      });
+    }
+
+    // Habilitar cache offline para melhor performance
+    db.enablePersistence().catch((err) => {
+      // Silenciosamente ignorar erros de persistência
+    });
+
+    // Auto-login com usuário demo (não bloqueia carregamento da página)
+    auth.signInWithEmailAndPassword(demoUserEmail, demoUserPassword)
+      .catch(async (error) => {
+        // Se não existe, cria o usuário demo
+        if (error.code === 'auth/user-not-found') {
+          try {
+            const userCredential = await auth.createUserWithEmailAndPassword(demoUserEmail, demoUserPassword);
+            const user = userCredential.user;
+
+            // Criar documento do usuário no Firestore
+            await db.collection('users').doc(user.uid).set({
+              fullName: "Usuário Demo",
+              email: demoUserEmail,
+              company: "FleetFuel Demo",
+              createdAt: new Date(),
+              vehicles: [],
+              refuel_records: []
+            });
+          } catch (createError) {
+            // Erro ao criar usuário
+          }
+        }
+      })
+      .finally(() => {
+        firebaseReady = true;
+      });
+
+  });
+
+} catch (error) {
+  console.error('Erro ao inicializar Firebase:', error.message);
+}
 
