@@ -5,7 +5,7 @@
   },
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!src|public|api).*)",
       "destination": "/index.html"
     }
   ],
