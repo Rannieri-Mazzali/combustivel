@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // Carregar dados do usuário (não bloqueia)
-async function loadUserData() {
+window.loadUserData = async function() {
   try {
     const userDoc = await db.collection('users').doc(currentUser.uid).get();
     const userData = userDoc.data();
@@ -54,7 +54,7 @@ async function loadUserData() {
 }
 
 // Carregar veículos do usuário (otimizado)
-async function loadVehicles() {
+window.loadVehicles = async function() {
   try {
     const result = await VehicleModule.getUserVehicles(currentUser.uid);
 
@@ -87,7 +87,7 @@ async function loadVehicles() {
 }
 
 // Atualizar estatísticas
-async function updateStats() {
+window.updateStats = async function() {
   if (userVehicles.length === 0) return;
 
   // Obter último abastecimento
@@ -112,7 +112,7 @@ async function updateStats() {
 }
 
 // Carregar abastecimentos recentes
-async function loadRecentRefuels() {
+window.loadRecentRefuels = async function() {
   const result = await RefuelModule.getUserRefuelHistory(currentUser.uid, 5);
 
   const container = document.getElementById('recent-refuels');
@@ -142,7 +142,7 @@ async function loadRecentRefuels() {
 }
 
 // Handle Refuel Submit - Otimizado
-async function handleRefuelSubmit(event) {
+window.handleRefuelSubmit = async function(event) {
   event.preventDefault();
 
   const vehicleId = document.getElementById('vehicle-select').value;
@@ -199,7 +199,7 @@ async function handleRefuelSubmit(event) {
 }
 
 // Reset Form
-function resetForm() {
+window.resetForm = function() {
   document.getElementById('refuel-km').value = '';
   document.getElementById('refuel-liters').value = '';
   document.getElementById('refuel-cost').value = '';
@@ -216,7 +216,7 @@ function resetForm() {
 }
 
 // Handle Logout
-async function handleLogout() {
+window.handleLogout = async function() {
   UtilsModule.showLoading(true);
   
   const result = await AuthModule.logout();
@@ -232,12 +232,12 @@ async function handleLogout() {
 }
 
 // Função auxiliar de navegação
-function navigateTo(page) {
+window.navigateTo = function(page) {
   window.location.href = page;
 }
 
 // Gerar PDF do abastecimento
-async function generateRefuelPDF(vehicle, userData, refuelData, recordId) {
+window.generateRefuelPDF = async function(vehicle, userData, refuelData, recordId) {
   try {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();

@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // Carregar dados do usuário (sem bloquear)
-async function loadUserData() {
+window.loadUserData = async function() {
   try {
     const userDoc = await db.collection('users').doc(currentUser.uid).get();
     const userData = userDoc.data();
@@ -34,7 +34,7 @@ async function loadUserData() {
 }
 
 // Carregar e exibir veículos
-async function loadVehicles() {
+window.loadVehicles = async function() {
   UtilsModule.showLoading(true);
 
   const result = await VehicleModule.getUserVehicles(currentUser.uid);
@@ -50,7 +50,7 @@ async function loadVehicles() {
 }
 
 // Exibir veículos na tela
-function displayVehicles() {
+window.displayVehicles = function() {
   const container = document.getElementById('vehicles-container');
   container.innerHTML = '';
 
@@ -127,7 +127,7 @@ function displayVehicles() {
 }
 
 // Handle Add Vehicle - Otimizado com validações robustas
-async function handleAddVehicle(event) {
+window.handleAddVehicle = async function(event) {
   event.preventDefault();
 
   const plate = document.getElementById('vehicle-plate').value.trim();
@@ -181,7 +181,7 @@ async function handleAddVehicle(event) {
 }
 
 // Abrir modal de edição
-function openEditVehicleModal(vehicleId, model, capacity) {
+window.openEditVehicleModal = function(vehicleId, model, capacity) {
   document.getElementById('edit-vehicle-id').value = vehicleId;
   document.getElementById('edit-vehicle-model').value = model;
   document.getElementById('edit-vehicle-capacity').value = capacity;
@@ -190,12 +190,12 @@ function openEditVehicleModal(vehicleId, model, capacity) {
 }
 
 // Fechar modal
-function closeEditVehicleModal() {
+window.closeEditVehicleModal = function() {
   document.getElementById('edit-vehicle-modal').classList.add('hidden');
 }
 
 // Salvar edição de veículo - Otimizado
-async function saveVehicleEdit(event) {
+window.saveVehicleEdit = async function(event) {
   event.preventDefault();
 
   const vehicleId = document.getElementById('edit-vehicle-id').value;
@@ -226,7 +226,7 @@ async function saveVehicleEdit(event) {
 }
 
 // Deletar veículo - Otimizado
-async function deleteVehicle(vehicleId, licensePlate) {
+window.deleteVehicle = async function(vehicleId, licensePlate) {
   if (confirm(`Tem certeza que deseja deletar o veículo ${licensePlate}? Esta ação não pode ser desfeita.`)) {
     UtilsModule.showLoading(true);
 
@@ -248,12 +248,12 @@ async function deleteVehicle(vehicleId, licensePlate) {
 }
 
 // Ver histórico do veículo
-function viewVehicleHistory(vehicleId) {
+window.viewVehicleHistory = function(vehicleId) {
   window.location.href = `history.html?vehicle=${vehicleId}`;
 }
 
 // Handle Logout
-async function handleLogout() {
+window.handleLogout = async function() {
   UtilsModule.showLoading(true);
   
   const result = await AuthModule.logout();
@@ -269,6 +269,6 @@ async function handleLogout() {
 }
 
 // Função auxiliar de navegação
-function navigateTo(page) {
+window.navigateTo = function(page) {
   window.location.href = page;
 }

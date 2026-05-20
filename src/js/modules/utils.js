@@ -141,3 +141,6 @@ const UtilsModule = {
     return plate.toUpperCase().replace(/[^A-Z0-9]/g, '');
   }
 };
+
+// Exportar para uso global
+window.UtilsModule = UtilsModule;

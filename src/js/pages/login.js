@@ -9,28 +9,28 @@ AuthModule.onAuthStateChanged(user => {
 });
 
 // Mostrar formulário de login
-function showLoginForm() {
+window.showLoginForm = function() {
   document.getElementById('login-form').classList.remove('hidden');
   document.getElementById('register-form').classList.add('hidden');
   document.getElementById('forgot-password-form').classList.add('hidden');
 }
 
 // Mostrar formulário de registro
-function showRegisterForm() {
+window.showRegisterForm = function() {
   document.getElementById('login-form').classList.add('hidden');
   document.getElementById('register-form').classList.remove('hidden');
   document.getElementById('forgot-password-form').classList.add('hidden');
 }
 
 // Mostrar formulário de recuperação de senha
-function showForgotPasswordForm() {
+window.showForgotPasswordForm = function() {
   document.getElementById('login-form').classList.add('hidden');
   document.getElementById('register-form').classList.add('hidden');
   document.getElementById('forgot-password-form').classList.remove('hidden');
 }
 
 // Handle Login
-async function handleLogin(event) {
+window.handleLogin = async function(event) {
   event.preventDefault();
   
   const email = document.getElementById('login-email').value;
@@ -53,7 +53,7 @@ async function handleLogin(event) {
 }
 
 // Handle Register
-async function handleRegister(event) {
+window.handleRegister = async function(event) {
   event.preventDefault();
 
   const fullName = document.getElementById('register-fullname').value;
@@ -100,7 +100,7 @@ async function handleRegister(event) {
 }
 
 // Handle Reset Password
-async function handleResetPassword(event) {
+window.handleResetPassword = async function(event) {
   event.preventDefault();
 
   const email = document.getElementById('reset-email').value;
@@ -123,7 +123,7 @@ async function handleResetPassword(event) {
 }
 
 // Função auxiliar de navegação
-function navigateTo(page) {
+window.navigateTo = function(page) {
   window.location.href = page;
 }
 

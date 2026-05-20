@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // Load user data
-async function loadUserData() {
+window.loadUserData = async function() {
   try {
     const userDoc = await db.collection('users').doc(currentUser.uid).get();
     const userData = userDoc.data();
@@ -39,7 +39,7 @@ async function loadUserData() {
 }
 
 // Load depot data
-async function loadDepotData() {
+window.loadDepotData = async function() {
   UtilsModule.showLoading(true);
 
   const result = await FuelDepotModule.getUserDepotData(currentUser.uid);
@@ -55,7 +55,7 @@ async function loadDepotData() {
 }
 
 // Update depot visual
-function updateDepotDisplay() {
+window.updateDepotDisplay = function() {
   if (!depotData) return;
 
   const percentage = (depotData.totalLiters / depotData.capacity) * 100;
@@ -95,7 +95,7 @@ function updateDepotDisplay() {
 }
 
 // Get color based on fuel level
-function getFuelColor(percentage) {
+window.getFuelColor = function(percentage) {
   if (percentage > 75) {
     return '#10b981'; // Green
   } else if (percentage > 50) {
@@ -108,7 +108,7 @@ function getFuelColor(percentage) {
 }
 
 // Load depot history
-async function loadDepotHistory() {
+window.loadDepotHistory = async function() {
   const result = await FuelDepotModule.getDepotHistory(currentUser.uid, 30);
 
   if (result.success) {
@@ -118,7 +118,7 @@ async function loadDepotHistory() {
 }
 
 // Display depot history
-function displayDepotHistory() {
+window.displayDepotHistory = function() {
   const container = document.getElementById('history-container');
   container.innerHTML = '';
 
@@ -155,7 +155,7 @@ function displayDepotHistory() {
 }
 
 // Handle add fuel
-async function handleAddFuel(event) {
+window.handleAddFuel = async function(event) {
   event.preventDefault();
 
   const fuelType = document.getElementById('fuel-type').value;
@@ -201,7 +201,7 @@ async function handleAddFuel(event) {
 }
 
 // Handle capacity update
-async function handleCapacityUpdate(event) {
+window.handleCapacityUpdate = async function(event) {
   event.preventDefault();
 
   const newCapacity = parseFloat(document.getElementById('new-capacity').value);
@@ -237,17 +237,17 @@ async function handleCapacityUpdate(event) {
 }
 
 // Modal functions
-function openCapacityModal() {
+window.openCapacityModal = function() {
   document.getElementById('capacity-modal').classList.remove('hidden');
   document.getElementById('new-capacity').value = depotData.capacity;
 }
 
-function closeCapacityModal() {
+window.closeCapacityModal = function() {
   document.getElementById('capacity-modal').classList.add('hidden');
 }
 
 // Handle logout
-async function handleLogout() {
+window.handleLogout = async function() {
   UtilsModule.showLoading(true);
   
   const result = await AuthModule.logout();
@@ -263,6 +263,6 @@ async function handleLogout() {
 }
 
 // Navigation helper
-function navigateTo(page) {
+window.navigateTo = function(page) {
   window.location.href = page;
 }

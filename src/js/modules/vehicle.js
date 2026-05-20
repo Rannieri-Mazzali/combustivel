@@ -139,3 +139,6 @@ const VehicleModule = {
     }
   }
 };
+
+// Exportar para uso global
+window.VehicleModule = VehicleModule;

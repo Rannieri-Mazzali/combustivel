@@ -157,3 +157,6 @@ const RefuelModule = {
     }
   }
 };
+
+// Exportar para uso global
+window.RefuelModule = RefuelModule;

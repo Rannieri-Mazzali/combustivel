@@ -76,3 +76,6 @@ const EmailModule = {
 document.addEventListener('DOMContentLoaded', () => {
   EmailModule.init();
 });
+
+// Exportar para uso global
+window.EmailModule = EmailModule;

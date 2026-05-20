@@ -66,3 +66,6 @@ const AuthModule = {
     }
   }
 };
+
+// Exportar para uso global
+window.AuthModule = AuthModule;

@@ -165,3 +165,6 @@ const FuelDepotModule = {
     }
   }
 };
+
+// Exportar para uso global
+window.FuelDepotModule = FuelDepotModule;

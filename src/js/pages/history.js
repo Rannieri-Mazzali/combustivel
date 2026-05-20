@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // Carregar dados do usuário (não bloqueia)
-async function loadUserData() {
+window.loadUserData = async function() {
   try {
     const userDoc = await db.collection('users').doc(currentUser.uid).get();
     const userData = userDoc.data();
@@ -47,7 +47,7 @@ async function loadUserData() {
 }
 
 // Carregar veículos (não bloqueia)
-async function loadVehicles() {
+window.loadVehicles = async function() {
   try {
     const result = await VehicleModule.getUserVehicles(currentUser.uid);
 
@@ -70,7 +70,7 @@ async function loadVehicles() {
 }
 
 // Carregar histórico
-async function loadHistory() {
+window.loadHistory = async function() {
   UtilsModule.showLoading(true);
 
   const result = await RefuelModule.getUserRefuelHistory(currentUser.uid, 1000);
@@ -87,7 +87,7 @@ async function loadHistory() {
 }
 
 // Aplicar filtros
-function applyFilters() {
+window.applyFilters = function() {
   const vehicleFilter = document.getElementById('filter-vehicle').value;
   const dateStart = document.getElementById('filter-date-start').value;
   const dateEnd = document.getElementById('filter-date-end').value;
@@ -114,7 +114,7 @@ function applyFilters() {
 }
 
 // Exibir registros na tabela
-function displayRecords() {
+window.displayRecords = function() {
   const tbody = document.getElementById('refuel-table-body');
   tbody.innerHTML = '';
 
@@ -160,7 +160,7 @@ function displayRecords() {
 }
 
 // Atualizar informações de paginação
-function updatePagination() {
+window.updatePagination = function() {
   const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
   const start = (currentPage - 1) * recordsPerPage + 1;
   const end = Math.min(currentPage * recordsPerPage, filteredRecords.length);
@@ -170,7 +170,7 @@ function updatePagination() {
 }
 
 // Próxima página
-function nextPage() {
+window.nextPage = function() {
   const totalPages = Math.ceil(filteredRecords.length / recordsPerPage);
   if (currentPage < totalPages) {
     currentPage++;
@@ -180,7 +180,7 @@ function nextPage() {
 }
 
 // Página anterior
-function previousPage() {
+window.previousPage = function() {
   if (currentPage > 1) {
     currentPage--;
     displayRecords();
@@ -189,7 +189,7 @@ function previousPage() {
 }
 
 // Abrir modal de edição
-function openEditModal(recordId) {
+window.openEditModal = function(recordId) {
   const record = allRecords.find(r => r.id === recordId);
   
   document.getElementById('edit-record-id').value = recordId;
@@ -201,12 +201,12 @@ function openEditModal(recordId) {
 }
 
 // Fechar modal
-function closeEditModal() {
+window.closeEditModal = function() {
   document.getElementById('edit-modal').classList.add('hidden');
 }
 
 // Salvar edição
-async function saveEdit(event) {
+window.saveEdit = async function(event) {
   event.preventDefault();
 
   const recordId = document.getElementById('edit-record-id').value;
@@ -230,7 +230,7 @@ async function saveEdit(event) {
 }
 
 // Deletar registro
-async function deleteRecord(recordId) {
+window.deleteRecord = async function(recordId) {
   if (confirm('Tem certeza que deseja deletar este registro?')) {
     UtilsModule.showLoading(true);
 
@@ -248,7 +248,7 @@ async function deleteRecord(recordId) {
 }
 
 // Atualizar sumário
-function updateSummary() {
+window.updateSummary = function() {
   const totalRecords = filteredRecords.length;
   const totalLiters = filteredRecords.reduce((sum, r) => sum + r.liters, 0);
   const totalCost = filteredRecords.reduce((sum, r) => sum + r.cost, 0);
@@ -261,7 +261,7 @@ function updateSummary() {
 }
 
 // Exportar para CSV
-function exportToCSV() {
+window.exportToCSV = function() {
   if (filteredRecords.length === 0) {
     UtilsModule.showNotification('Nenhum registro para exportar', 'warning');
     return;
@@ -286,7 +286,7 @@ function exportToCSV() {
 }
 
 // Enviar relatório por email
-async function sendReport() {
+window.sendReport = async function() {
   if (filteredRecords.length === 0) {
     UtilsModule.showNotification('Nenhum registro para enviar', 'warning');
     return;
@@ -308,7 +308,7 @@ async function sendReport() {
 }
 
 // Handle Logout
-async function handleLogout() {
+window.handleLogout = async function() {
   UtilsModule.showLoading(true);
   
   const result = await AuthModule.logout();
@@ -324,6 +324,6 @@ async function handleLogout() {
 }
 
 // Função auxiliar de navegação
-function navigateTo(page) {
+window.navigateTo = function(page) {
   window.location.href = page;
 }
