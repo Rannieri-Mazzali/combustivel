@@ -1,18 +1,10 @@
-// Fuel Depot Page Script
-let currentUser = null;
+// Fuel Depot Page Script - Sem Firebase
+let currentUser = { uid: 'default', name: 'Usuário' };
 let depotData = null;
 let depotHistory = [];
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
-  AuthModule.onAuthStateChanged(async user => {
-    if (!user) {
-      window.location.href = '../index.html';
-      return;
-    }
-
-    currentUser = user;
-    
     // Load data in parallel
     Promise.all([
       loadUserData(),
@@ -22,16 +14,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Update display every 2 seconds
     setInterval(updateDepotDisplay, 2000);
-  });
 });
 
 // Load user data
 window.loadUserData = async function() {
   try {
-    const userDoc = await db.collection('users').doc(currentUser.uid).get();
-    const userData = userDoc.data();
-    if (userData) {
-      document.getElementById('user-name').textContent = userData.fullName.split(' ')[0];
+    const userNameEl = document.getElementById('user-name');
+    if (userNameEl) {
+      userNameEl.textContent = 'SilverControl';
     }
   } catch (err) {
     console.error('Erro ao carregar dados do usuário:', err);

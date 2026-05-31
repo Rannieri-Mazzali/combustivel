@@ -1,32 +1,22 @@
-// Vehicles Page Script
-let currentUser = null;
+// Vehicles Page Script - Sem Firebase
+let currentUser = { uid: 'default', name: 'Usuário' };
 let userVehicles = [];
 
 // Inicializar página de veículos
 document.addEventListener('DOMContentLoaded', async () => {
-  AuthModule.onAuthStateChanged(async user => {
-    if (!user) {
-      window.location.href = '../index.html';
-      return;
-    }
-
-    currentUser = user;
-    
-    // Carregar dados em paralelo para mais velocidade
+    // Carregar dados em paralelo
     Promise.all([
       loadUserData(),
       loadVehicles()
     ]).catch(err => console.error('Erro ao carregar dados:', err));
-  });
 });
 
 // Carregar dados do usuário (sem bloquear)
 window.loadUserData = async function() {
   try {
-    const userDoc = await db.collection('users').doc(currentUser.uid).get();
-    const userData = userDoc.data();
-    if (userData) {
-      document.getElementById('user-name').textContent = userData.fullName.split(' ')[0];
+    const userNameEl = document.getElementById('user-name');
+    if (userNameEl) {
+      userNameEl.textContent = 'SilverControl';
     }
   } catch (err) {
     console.error('Erro ao carregar dados do usuário:', err);
@@ -261,7 +251,7 @@ window.handleLogout = async function() {
   if (result.success) {
     UtilsModule.showNotification('Logout realizado com sucesso!', 'success');
     setTimeout(() => {
-      window.location.href = '../index.html';
+      window.location.href = '/index.html';
     }, 1000);
   }
 

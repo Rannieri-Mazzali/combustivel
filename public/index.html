@@ -3,56 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FleetFuel - Gestão de Abastecimento</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="../src/css/styles.css">
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <title>SilverControl - Sistema de Gestão de Combustível</title>
+    <script>
+        // Redirect imediatamente para dashboard
+        window.location.href = '/dashboard.html';
+    </script>
 </head>
-<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-    <div class="min-h-screen flex items-center justify-center">
-    <div class="min-h-screen flex items-center justify-center">
-        <div class="text-center">
-            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full mb-6">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                </svg>
+<body>
+    Redirecionando...
+</body>
+</html>
             </div>
-            <h1 class="text-4xl font-bold text-white mb-2">FleetFuel</h1>
-            <p class="text-slate-400 mb-8">Carregando sua aplicação...</p>
-            <div class="flex justify-center">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+
+            <!-- Register Form -->
+            <div id="register-form" class="hidden bg-slate-800 rounded-lg shadow-2xl p-8 border border-slate-700">
+                <h2 class="text-2xl font-bold text-white mb-6">Registrar</h2>
+                <form onsubmit="handleRegister(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Nome Completo</label>
+                        <input 
+                            type="text" 
+                            id="register-fullname"
+                            placeholder="Seu Nome"
+                            class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                            required
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Empresa</label>
+                        <input 
+                            type="text" 
+                            id="register-company"
+                            placeholder="Nome da Empresa"
+                            class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                            required
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Email</label>
+                        <input 
+                            type="email" 
+                            id="register-email"
+                            placeholder="seu@email.com"
+                            class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                            required
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Senha</label>
+                        <input 
+                            type="password" 
+                            id="register-password"
+                            placeholder="••••••••"
+                            class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                            required
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Confirmar Senha</label>
+                        <input 
+                            type="password" 
+                            id="register-password-confirm"
+                            placeholder="••••••••"
+                            class="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                            required
+                        >
+                    </div>
+                    <button 
+                        type="submit"
+                        class="w-full py-2 px-4 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg hover:from-green-600 hover:to-green-700 transition"
+                    >
+                        Criar Conta
+                    </button>
+                </form>
+                <p class="text-center text-slate-400 text-sm mt-4">
+                    Já tem conta? 
+                    <button onclick="showLoginForm()" class="text-blue-400 hover:text-blue-300 font-semibold">
+                        Faça Login
+                    </button>
+                </p>
             </div>
         </div>
     </div>
 
-    <!-- Firebase Config -->
-    <script src="/src/js/firebase-config.js"></script>
-    
-    <!-- Modules -->
+    <!-- Config e Modules -->
+    <script src="/src/js/config.js"></script>
     <script src="/src/js/modules/utils.js"></script>
     <script src="/src/js/modules/auth.js"></script>
     <script src="/src/js/modules/vehicle.js"></script>
     <script src="/src/js/modules/refuel.js"></script>
     <script src="/src/js/modules/email.js"></script>
     
-    <!-- Page Scripts -->
-    <script src="/src/js/pages/login.js"></script>
-
     <script>
-        // Redirecionar para dashboard assim que a página carregar
+        window.showLoginForm = function() {
+            document.getElementById('login-form').classList.remove('hidden');
+            document.getElementById('register-form').classList.add('hidden');
+        }
+
+        window.showRegisterForm = function() {
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('register-form').classList.remove('hidden');
+        }
+
+        window.handleLogin = async function(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            UtilsModule.showLoading(true);
+
+            const result = await AuthModule.login(email, password);
+
+            if (result.success) {
+                UtilsModule.showNotification('Login realizado!', 'success');
+                setTimeout(() => {
+                    window.location.href = '/dashboard.html';
+                }, 500);
+            } else {
+                UtilsModule.showLoading(false);
+                UtilsModule.showNotification('Erro: ' + result.error, 'error');
+            }
+        }
+
+        window.handleRegister = async function(event) {
+            event.preventDefault();
+
+            const fullName = document.getElementById('register-fullname').value;
+            const company = document.getElementById('register-company').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const passwordConfirm = document.getElementById('register-password-confirm').value;
+
+            if (!UtilsModule.validateEmail(email)) {
+                UtilsModule.showNotification('Email inválido', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                UtilsModule.showNotification('Senha deve ter no mínimo 6 caracteres', 'error');
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                UtilsModule.showNotification('As senhas não coincidem', 'error');
+                return;
+            }
+
+            UtilsModule.showLoading(true);
+
+            const result = await AuthModule.register(email, password, fullName, company);
+
+            if (result.success) {
+                UtilsModule.showNotification('Conta criada! Direcionando...', 'success');
+                setTimeout(() => {
+                    window.location.href = '/dashboard.html';
+                }, 500);
+            } else {
+                UtilsModule.showLoading(false);
+                UtilsModule.showNotification('Erro: ' + result.error, 'error');
+            }
+        }
+
+        // Verificar se já está logado
         window.addEventListener('load', function() {
-            setTimeout(function() {
-                window.location.href = 'dashboard.html';
-            }, 800);
+            if (AuthModule.getCurrentUser()) {
+                window.location.href = '/dashboard.html';
+            }
         });
-        
-        // Fallback se a página não carregar em tempo hábil
-        setTimeout(function() {
-            window.location.href = 'dashboard.html';
-        }, 3000);
     </script>
 </body>
 </html>

@@ -1,5 +1,5 @@
-// History Page Script
-let currentUser = null;
+// History Page Script - Sem Firebase
+let currentUser = { uid: 'default', name: 'Usuário' };
 let userVehicles = [];
 let allRecords = [];
 let filteredRecords = [];
@@ -8,14 +8,6 @@ const recordsPerPage = 10;
 
 // Inicializar página de histórico
 document.addEventListener('DOMContentLoaded', async () => {
-  AuthModule.onAuthStateChanged(async user => {
-    if (!user) {
-      window.location.href = '../index.html';
-      return;
-    }
-
-    currentUser = user;
-    
     // Carregar dados em paralelo
     UtilsModule.showLoading(true);
     try {
@@ -30,16 +22,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     } finally {
       UtilsModule.showLoading(false);
     }
-  });
 });
 
 // Carregar dados do usuário (não bloqueia)
 window.loadUserData = async function() {
   try {
-    const userDoc = await db.collection('users').doc(currentUser.uid).get();
-    const userData = userDoc.data();
-    if (userData) {
-      document.getElementById('user-name').textContent = userData.fullName.split(' ')[0];
+    const userNameEl = document.getElementById('user-name');
+    if (userNameEl) {
+      userNameEl.textContent = 'SilverControl';
     }
   } catch (err) {
     console.error('Erro ao carregar dados do usuário:', err);

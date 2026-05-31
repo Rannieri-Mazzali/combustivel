@@ -1,26 +1,20 @@
-// Dashboard Page Script
-let currentUser = null;
+// Dashboard Page Script - Sem Firebase
+let currentUser = { uid: 'default', name: 'Usuário' };
 let userVehicles = [];
 let allRefuelRecords = [];
 
 // Inicializar dashboard
 document.addEventListener('DOMContentLoaded', async () => {
-  AuthModule.onAuthStateChanged(async user => {
-    if (!user) {
-      window.location.href = '../index.html';
-      return;
-    }
-
-    currentUser = user;
-    
     // Set data e hora imediatamente (sem aguardar)
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('refuel-date').value = today;
+    const dateField = document.getElementById('refuel-date');
+    if (dateField) dateField.value = today;
 
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
-    document.getElementById('refuel-time').value = `${hours}:${minutes}`;
+    const timeField = document.getElementById('refuel-time');
+    if (timeField) timeField.value = `${hours}:${minutes}`;
     
     // Carregar tudo em paralelo
     UtilsModule.showLoading(true);
@@ -37,23 +31,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     } finally {
       UtilsModule.showLoading(false);
     }
-  });
 });
 
-// Carregar dados do usuário (não bloqueia)
+// Carregar dados do usuário
 window.loadUserData = async function() {
   try {
-    const userDoc = await db.collection('users').doc(currentUser.uid).get();
-    const userData = userDoc.data();
-    if (userData) {
-      document.getElementById('user-name').textContent = userData.fullName.split(' ')[0];
+    const userNameEl = document.getElementById('user-name');
+    if (userNameEl) {
+      userNameEl.textContent = 'SilverControl';
     }
   } catch (err) {
     console.error('Erro ao carregar dados do usuário:', err);
   }
 }
 
-// Carregar veículos do usuário (otimizado)
+// Carregar veículos do usuário
 window.loadVehicles = async function() {
   try {
     const result = await VehicleModule.getUserVehicles(currentUser.uid);
@@ -62,11 +54,14 @@ window.loadVehicles = async function() {
       userVehicles = result.vehicles;
 
       const select = document.getElementById('vehicle-select');
+      if (!select) return;
+      
       select.innerHTML = '';
 
       if (userVehicles.length === 0) {
         select.innerHTML = '<option value="">Nenhum veículo cadastrado</option>';
-        document.getElementById('total-vehicles').textContent = '0';
+        const totalEl = document.getElementById('total-vehicles');
+        if (totalEl) totalEl.textContent = '0';
       } else {
         userVehicles.forEach(vehicle => {
           const option = document.createElement('option');
@@ -75,7 +70,8 @@ window.loadVehicles = async function() {
           select.appendChild(option);
         });
 
-        document.getElementById('total-vehicles').textContent = userVehicles.length;
+        const totalEl = document.getElementById('total-vehicles');
+        if (totalEl) totalEl.textContent = userVehicles.length;
         
         // Calcular estatísticas
         await updateStats();
@@ -91,11 +87,14 @@ window.updateStats = async function() {
   if (userVehicles.length === 0) return;
 
   // Obter último abastecimento
-  const result = await RefuelModule.getUserRefuelHistory(currentUser.uid, 1);
+  const result = await RefuelModule.getUserRefuelHistory(currentUser.uid, 50);
   
   if (result.success && result.records.length > 0) {
     const lastRefuel = result.records[0];
-    document.getElementById('last-refuel').textContent = UtilsModule.formatDate(lastRefuel.date);
+    const lastRefuelEl = document.getElementById('last-refuel');
+    if (lastRefuelEl) {
+      lastRefuelEl.textContent = UtilsModule.formatDate(lastRefuel.date);
+    }
   }
 
   // Calcular estatísticas do mês
@@ -107,8 +106,10 @@ window.updateStats = async function() {
   const totalLiters = monthRecords.reduce((sum, r) => sum + r.liters, 0);
   const totalCost = monthRecords.reduce((sum, r) => sum + r.cost, 0);
 
-  document.getElementById('liters-month').textContent = UtilsModule.formatNumber(totalLiters, 0);
-  document.getElementById('cost-month').textContent = UtilsModule.formatCurrency(totalCost);
+  const litersEl = document.getElementById('liters-month');
+  const costEl = document.getElementById('cost-month');
+  if (litersEl) litersEl.textContent = UtilsModule.formatNumber(totalLiters, 0);
+  if (costEl) costEl.textContent = UtilsModule.formatCurrency(totalCost);
 }
 
 // Carregar abastecimentos recentes
@@ -141,7 +142,7 @@ window.loadRecentRefuels = async function() {
   }
 }
 
-// Handle Refuel Submit - Otimizado
+// Handle Refuel Submit
 window.handleRefuelSubmit = async function(event) {
   event.preventDefault();
 
@@ -151,9 +152,9 @@ window.handleRefuelSubmit = async function(event) {
   const date = document.getElementById('refuel-date').value;
   const time = document.getElementById('refuel-time').value;
   const cost = document.getElementById('refuel-cost').value;
-  const fuelType = document.getElementById('refuel-type').value;
-  const location = document.getElementById('refuel-location').value;
-  const notes = document.getElementById('refuel-notes').value;
+  const fuelType = document.getElementById('refuel-type')?.value || 'Diesel';
+  const location = document.getElementById('refuel-location')?.value || '';
+  const notes = document.getElementById('refuel-notes')?.value || '';
 
   if (!vehicleId) {
     UtilsModule.showNotification('Por favor, selecione um veículo', 'warning');
@@ -171,26 +172,15 @@ window.handleRefuelSubmit = async function(event) {
   if (result.success) {
     UtilsModule.showNotification('Abastecimento registrado com sucesso!', 'success');
     
-    // Limpar formulário imediatamente
+    // Limpar formulário
     resetForm();
-    UtilsModule.showLoading(false);
     
-    // Atualizar UI e enviar email em background (não bloqueia)
-    const vehicle = userVehicles.find(v => v.id === vehicleId);
-    const userData = (await db.collection('users').doc(currentUser.uid).get()).data();
-
-    // Executar em paralelo, mas não esperar
-    Promise.all([
-      generateRefuelPDF(vehicle, userData, refuelData, result.recordId).catch(err => console.error('PDF error:', err)),
-      EmailModule.sendRefuelEmail(userData, vehicle, {
-        ...refuelData,
-        date: new Date(`${date}T${time}`)
-      }).catch(err => console.error('Email error:', err))
-    ]).then(() => {
-      // Atualizar listagem após tudo completar
+    // Atualizar listagem
+    setTimeout(() => {
       loadRecentRefuels();
       updateStats();
-    });
+      UtilsModule.showLoading(false);
+    }, 500);
     
   } else {
     UtilsModule.showLoading(false);
@@ -198,164 +188,35 @@ window.handleRefuelSubmit = async function(event) {
   }
 }
 
-// Reset Form
+// Limpar formulário
 window.resetForm = function() {
+  document.getElementById('vehicle-select').value = '';
   document.getElementById('refuel-km').value = '';
   document.getElementById('refuel-liters').value = '';
   document.getElementById('refuel-cost').value = '';
-  document.getElementById('refuel-location').value = '';
-  document.getElementById('refuel-notes').value = '';
-
+  const locEl = document.getElementById('refuel-location');
+  const notesEl = document.getElementById('refuel-notes');
+  if (locEl) locEl.value = '';
+  if (notesEl) notesEl.value = '';
+  
   const today = new Date().toISOString().split('T')[0];
   document.getElementById('refuel-date').value = today;
-
+  
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, '0');
   const minutes = String(now.getMinutes()).padStart(2, '0');
   document.getElementById('refuel-time').value = `${hours}:${minutes}`;
 }
 
-// Handle Logout
-window.handleLogout = async function() {
-  UtilsModule.showLoading(true);
-  
-  const result = await AuthModule.logout();
-
-  if (result.success) {
-    UtilsModule.showNotification('Logout realizado com sucesso!', 'success');
-    setTimeout(() => {
-      window.location.href = '../index.html';
-    }, 1000);
-  }
-
-  UtilsModule.showLoading(false);
-}
-
-// Função auxiliar de navegação
+// Navegar para outras páginas
 window.navigateTo = function(page) {
   window.location.href = page;
 }
 
-// Gerar PDF do abastecimento
-window.generateRefuelPDF = async function(vehicle, userData, refuelData, recordId) {
-  try {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    // Cores
-    const primaryColor = [30, 41, 59]; // Slate-800
-    const secondaryColor = [100, 116, 139]; // Slate-400
-    const accentColor = [59, 130, 246]; // Blue-500
-
-    // Header
-    doc.setFillColor(...primaryColor);
-    doc.rect(0, 0, 210, 40, 'F');
-
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
-    doc.setFont(undefined, 'bold');
-    doc.text('FleetFuel', 15, 20);
-
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.text('Sistema de Gestão de Abastecimento de Frota', 15, 28);
-
-    // Informações principais
-    doc.setTextColor(...primaryColor);
-    doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
-    doc.text('Comprovante de Abastecimento', 15, 50);
-
-    // Linha separadora
-    doc.setDrawColor(...accentColor);
-    doc.setLineWidth(0.5);
-    doc.line(15, 52, 195, 52);
-
-    // Informações do usuário e veículo
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    doc.setTextColor(...primaryColor);
-
-    const yStart = 60;
-    const lineHeight = 7;
-
-    // Coluna 1
-    doc.text('Empresa:', 15, yStart);
-    doc.setFont(undefined, 'bold');
-    doc.text(userData.company || 'N/A', 50, yStart);
-
-    doc.setFont(undefined, 'normal');
-    doc.text('Motorista:', 15, yStart + lineHeight);
-    doc.setFont(undefined, 'bold');
-    doc.text(userData.fullName, 50, yStart + lineHeight);
-
-    doc.setFont(undefined, 'normal');
-    doc.text('Email:', 15, yStart + lineHeight * 2);
-    doc.setFont(undefined, 'bold');
-    doc.text(userData.email, 50, yStart + lineHeight * 2);
-
-    // Coluna 2
-    doc.setFont(undefined, 'normal');
-    doc.text('Placa do Veículo:', 120, yStart);
-    doc.setFont(undefined, 'bold');
-    doc.text(vehicle.licensePlate, 155, yStart);
-
-    doc.setFont(undefined, 'normal');
-    doc.text('Modelo:', 120, yStart + lineHeight);
-    doc.setFont(undefined, 'bold');
-    doc.text(vehicle.model, 155, yStart + lineHeight);
-
-    doc.setFont(undefined, 'normal');
-    doc.text('Capacidade:', 120, yStart + lineHeight * 2);
-    doc.setFont(undefined, 'bold');
-    doc.text(`${vehicle.capacity}L`, 155, yStart + lineHeight * 2);
-
-    // Informações do abastecimento
-    doc.setTextColor(...primaryColor);
-    doc.setFont(undefined, 'bold');
-    doc.setFontSize(12);
-    doc.text('Dados do Abastecimento', 15, yStart + lineHeight * 4);
-
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'normal');
-    const dataStart = yStart + lineHeight * 5.5;
-
-    const dataFields = [
-      { label: 'Data:', value: refuelData.date, x: 15 },
-      { label: 'Hora:', value: refuelData.time, x: 80 },
-      { label: 'Quilometragem:', value: `${refuelData.km} km`, x: 145 },
-      { label: 'Litros:', value: `${refuelData.liters}L`, x: 15, y: lineHeight },
-      { label: 'Tipo Combustível:', value: refuelData.fuelType, x: 80, y: lineHeight },
-      { label: 'Custo:', value: `R$ ${parseFloat(refuelData.cost).toFixed(2)}`, x: 145, y: lineHeight },
-      { label: 'Localização:', value: refuelData.location || 'N/A', x: 15, y: lineHeight * 2, fullWidth: true },
-      { label: 'Notas:', value: refuelData.notes || 'N/A', x: 15, y: lineHeight * 3, fullWidth: true }
-    ];
-
-    dataFields.forEach(field => {
-      const y = dataStart + (field.y || 0);
-      doc.setFont(undefined, 'bold');
-      doc.text(field.label, field.x, y);
-      doc.setFont(undefined, 'normal');
-      doc.text(field.value.toString(), field.x + 35, y);
-    });
-
-    // Footer
-    doc.setTextColor(...secondaryColor);
-    doc.setFontSize(8);
-    const pageHeight = doc.internal.pageSize.height;
-    doc.text(
-      `ID do Registro: ${recordId || 'N/A'} | Gerado em: ${new Date().toLocaleString('pt-BR')}`,
-      15,
-      pageHeight - 10
-    );
-
-    // Salvar PDF
-    const fileName = `abastecimento_${vehicle.licensePlate}_${refuelData.date}.pdf`;
-    doc.save(fileName);
-
-    console.log('✅ PDF gerado com sucesso:', fileName);
-  } catch (error) {
-    console.error('❌ Erro ao gerar PDF:', error);
-    UtilsModule.showNotification('Erro ao gerar PDF', 'error');
-  }
+// Logout
+window.handleLogout = async function() {
+  UtilsModule.showNotification('Saindo do app...', 'info');
+  setTimeout(() => {
+    window.location.href = '/index.html';
+  }, 500);
 }

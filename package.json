@@ -1,16 +1,14 @@
 {
-  "name": "FleetFuel",
+  "name": "SilverControl",
   "version": "1.0.0",
-  "description": "Sistema de Gestão de Abastecimento de Frota",
-  "keywords": ["frota", "abastecimento", "combustível", "gestão", "caminhões"],
-  "author": "FleetFuel",
+  "description": "Sistema Simples de Gestão de Combustível",
+  "keywords": ["combustível", "gestão", "veículos", "silvercontrol"],
+  "author": "SilverControl",
   "license": "MIT",
   "scripts": {
     "build": "echo 'Static site - no build needed'",
     "start": "echo 'Static site - ready to serve'"
   },
   "dependencies": {
-    "firebase": "^9.22.0",
-    "@emailjs/browser": "^3.11.0"
   }
 }

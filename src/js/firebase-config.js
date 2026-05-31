@@ -1,86 +1,51 @@
-// Firebase Configuration - Otimizado para Performance
-// Para produção, atualize com suas credenciais reais
+// Firebase Configuration - Simplificado e Funcional
+// IMPORTANTE: Substitua com suas credenciais reais do Firebase
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDo_Demo_Key_For_Testing",
-  authDomain: "fleetfuel-demo.firebaseapp.com",
-  projectId: "fleetfuel-demo",
-  storageBucket: "fleetfuel-demo.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abcdef123456"
+  apiKey: "AIzaSyCJhVWJJKJ_H1z-KX_uV-YXz1234567890",
+  authDomain: "fleetfuel-app.firebaseapp.com",
+  projectId: "fleetfuel-app",
+  storageBucket: "fleetfuel-app.appspot.com",
+  messagingSenderId: "123456789012",
+  appId: "1:123456789012:web:abcdef1234567890"
 };
 
 let db, auth;
-let demoUserEmail = "demo@fleetfuel.local";
-let demoUserPassword = "demo123456";
 let firebaseReady = false;
 
-// Esperar Firebase estar pronto
-function waitForFirebase() {
-  return new Promise((resolve) => {
-    if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length > 0) {
-      resolve();
+// Inicializar Firebase quando os scripts carregarem
+function initializeFirebase() {
+  try {
+    if (typeof firebase === 'undefined') {
+      console.error('Firebase SDK não carregou');
       return;
     }
-    setTimeout(() => waitForFirebase().then(resolve), 100);
-  });
-}
 
-try {
-  // Aguardar Firebase carregar
-  waitForFirebase().then(() => {
     // Initialize Firebase
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
 
-    // Initialize Firestore com otimizações
+    // Initialize Firestore e Auth
     db = firebase.firestore();
     auth = firebase.auth();
 
-    // Modo desenvolvimento - otimizado para velocidade
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      db.settings({ 
-        experimentalForceLongPolling: false,
-        cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED
-      });
-    }
-
-    // Habilitar cache offline para melhor performance
-    db.enablePersistence().catch((err) => {
-      // Silenciosamente ignorar erros de persistência
+    // Ativar persistência offline
+    db.enablePersistence().catch(() => {
+      // Persistência já ativa ou não disponível
     });
 
-    // Auto-login com usuário demo (não bloqueia carregamento da página)
-    auth.signInWithEmailAndPassword(demoUserEmail, demoUserPassword)
-      .catch(async (error) => {
-        // Se não existe, cria o usuário demo
-        if (error.code === 'auth/user-not-found') {
-          try {
-            const userCredential = await auth.createUserWithEmailAndPassword(demoUserEmail, demoUserPassword);
-            const user = userCredential.user;
+    firebaseReady = true;
+    console.log('Firebase inicializado com sucesso');
+  } catch (error) {
+    console.error('Erro ao inicializar Firebase:', error.message);
+  }
+}
 
-            // Criar documento do usuário no Firestore
-            await db.collection('users').doc(user.uid).set({
-              fullName: "Usuário Demo",
-              email: demoUserEmail,
-              company: "FleetFuel Demo",
-              createdAt: new Date(),
-              vehicles: [],
-              refuel_records: []
-            });
-          } catch (createError) {
-            // Erro ao criar usuário
-          }
-        }
-      })
-      .finally(() => {
-        firebaseReady = true;
-      });
-
-  });
-
-} catch (error) {
-  console.error('Erro ao inicializar Firebase:', error.message);
+// Inicializar quando documento estiver pronto
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeFirebase);
+} else {
+  initializeFirebase();
 }
 
