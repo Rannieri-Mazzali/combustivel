@@ -30,18 +30,35 @@ window.loadUserData = async function() {
 
 // Load depot data
 window.loadDepotData = async function() {
+  if (!UtilsModule) return;
   UtilsModule.showLoading(true);
 
-  const result = await FuelDepotModule.getUserDepotData(currentUser.uid);
-
-  if (result.success) {
-    depotData = result.depot;
+  try {
+    // Use StorageModule directly instead of FuelDepotModule
+    const depots = StorageModule.getDepots();
+    let depot = depots.find(d => d.userId === currentUser.uid);
+    
+    if (!depot) {
+      depot = {
+        userId: currentUser.uid,
+        totalLiters: 0,
+        capacity: 5000,
+        lastUpdated: new Date().toISOString(),
+        createdAt: new Date().toISOString()
+      };
+      StorageModule.saveDepot(depot);
+    }
+    
+    depotData = depot;
     updateDepotDisplay();
-  } else {
-    UtilsModule.showNotification('Erro ao carregar depósito: ' + result.error, 'error');
+  } catch (error) {
+    console.error('Erro ao carregar depósito:', error);
+    if (UtilsModule) {
+      UtilsModule.showNotification('Erro ao carregar depósito', 'error');
+    }
   }
 
-  UtilsModule.showLoading(false);
+  if (UtilsModule) UtilsModule.showLoading(false);
 }
 
 // Update depot visual
@@ -236,21 +253,14 @@ window.closeCapacityModal = function() {
   document.getElementById('capacity-modal').classList.add('hidden');
 }
 
-// Handle logout
+// Handle logout (simulado - app sem login)
 window.handleLogout = async function() {
-  UtilsModule.showLoading(true);
-  
-  const result = await AuthModule.logout();
-
-  if (result.success) {
-    UtilsModule.showNotification('Logout realizado com sucesso!', 'success');
-    setTimeout(() => {
-      window.location.href = '../index.html';
-    }, 1000);
-  }
-
-  UtilsModule.showLoading(false);
+  UtilsModule.showNotification('Saindo do app...', 'info');
+  setTimeout(() => {
+    window.location.href = '../index.html';
+  }, 300);
 }
+
 
 // Navigation helper
 window.navigateTo = function(page) {

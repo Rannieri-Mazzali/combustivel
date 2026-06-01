@@ -275,43 +275,20 @@ window.exportToCSV = function() {
   UtilsModule.showNotification('Arquivo exportado com sucesso!', 'success');
 }
 
-// Enviar relatório por email
+// Enviar relatório por email (removido por causa de dependência externa)
 window.sendReport = async function() {
-  if (filteredRecords.length === 0) {
-    UtilsModule.showNotification('Nenhum registro para enviar', 'warning');
-    return;
-  }
-
-  UtilsModule.showLoading(true);
-
-  const userData = (await db.collection('users').doc(currentUser.uid).get()).data();
-  
-  const result = await EmailModule.sendDailyReport(userData, filteredRecords);
-
-  if (result.success) {
-    UtilsModule.showNotification('Relatório enviado com sucesso!', 'success');
-  } else {
-    UtilsModule.showNotification('Erro ao enviar relatório: ' + result.error, 'error');
-  }
-
-  UtilsModule.showLoading(false);
+  UtilsModule.showNotification('Envio de email desabilitado (app sem integrações externas).', 'info');
 }
 
-// Handle Logout
+
+// Handle Logout (simulado - app sem login)
 window.handleLogout = async function() {
-  UtilsModule.showLoading(true);
-  
-  const result = await AuthModule.logout();
-
-  if (result.success) {
-    UtilsModule.showNotification('Logout realizado com sucesso!', 'success');
-    setTimeout(() => {
-      window.location.href = '../index.html';
-    }, 1000);
-  }
-
-  UtilsModule.showLoading(false);
+  UtilsModule.showNotification('Saindo do app...', 'info');
+  setTimeout(() => {
+    window.location.href = '../index.html';
+  }, 300);
 }
+
 
 // Função auxiliar de navegação
 window.navigateTo = function(page) {

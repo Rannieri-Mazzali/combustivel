@@ -242,21 +242,14 @@ window.viewVehicleHistory = function(vehicleId) {
   window.location.href = `history.html?vehicle=${vehicleId}`;
 }
 
-// Handle Logout
+// Handle Logout (simulado - app sem login)
 window.handleLogout = async function() {
-  UtilsModule.showLoading(true);
-  
-  const result = await AuthModule.logout();
-
-  if (result.success) {
-    UtilsModule.showNotification('Logout realizado com sucesso!', 'success');
-    setTimeout(() => {
-      window.location.href = '/index.html';
-    }, 1000);
-  }
-
-  UtilsModule.showLoading(false);
+  UtilsModule.showNotification('Saindo do app...', 'info');
+  setTimeout(() => {
+    window.location.href = '/index.html';
+  }, 300);
 }
+
 
 // Função auxiliar de navegação
 window.navigateTo = function(page) {
